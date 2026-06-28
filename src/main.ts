@@ -369,6 +369,48 @@ window.printSupportedFormatCache = () => {
   return JSON.stringify(entries, null, 2);
 }
 
+function sameFormatIdentity (a: FileFormat, b: FileFormat): boolean {
+  return a.mime === b.mime
+    && a.format === b.format
+    && a.internal === b.internal;
+}
+
+function mergeHandlerSupportedFormats (handler: FormatHandler): boolean {
+  if (!handler.supportedFormats?.length) return false;
+
+  const cachedFormats = window.supportedFormatCache.get(handler.name);
+  if (!cachedFormats) {
+    window.supportedFormatCache.set(handler.name, [...handler.supportedFormats]);
+    return true;
+  }
+
+  let changed = false;
+  for (const format of handler.supportedFormats) {
+    const cachedFormat = cachedFormats.find(existing => sameFormatIdentity(existing, format));
+    if (!cachedFormat) {
+      cachedFormats.push(format);
+      changed = true;
+      continue;
+    }
+
+    if (format.from && !cachedFormat.from) {
+      cachedFormat.from = true;
+      changed = true;
+    }
+    if (format.to && !cachedFormat.to) {
+      cachedFormat.to = true;
+      changed = true;
+    }
+    if (format.lossless && !cachedFormat.lossless) {
+      cachedFormat.lossless = true;
+      changed = true;
+    }
+  }
+
+  if (changed) window.supportedFormatCache.set(handler.name, cachedFormats);
+  return true;
+}
+
 
 async function buildOptionList () {
 
@@ -379,6 +421,8 @@ async function buildOptionList () {
   ui.outputList.innerHTML = "";
 
   for (const [handlerIndex, handler] of handlers.entries()) {
+    mergeHandlerSupportedFormats(handler);
+
     if (!window.supportedFormatCache.has(handler.name)) {
       console.warn(`Cache miss for formats of handler "${handler.name}".`);
       showLoadingPopup("Loading tools...", `Loading ${handlerIndex + 1} of ${handlers.length}: ${handler.name}`);
@@ -389,7 +433,7 @@ async function buildOptionList () {
         continue;
       }
       if (handler.supportedFormats) {
-        window.supportedFormatCache.set(handler.name, handler.supportedFormats);
+        mergeHandlerSupportedFormats(handler);
         console.info(`Updated supported format cache for "${handler.name}".`);
       }
     }
@@ -440,11 +484,11 @@ async function buildOptionList () {
       newOption.appendChild(optionLabel);
 
       const clickHandler = (event: Event) => {
-        if (!(event.target instanceof HTMLButtonElement)) return;
-        const targetParent = event.target.parentElement;
+        if (!(event.currentTarget instanceof HTMLButtonElement)) return;
+        const targetParent = event.currentTarget.parentElement;
         const previous = targetParent?.getElementsByClassName("selected")?.[0];
         if (previous) previous.className = "";
-        event.target.className = "selected";
+        event.currentTarget.className = "selected";
         const allSelected = document.getElementsByClassName("selected");
         if (allSelected.length === 2) {
           ui.convertButton.className = "";

@@ -25,6 +25,11 @@ const handlers : FormatHandler[] = [
   new MockedHandler("archiver", [
     CommonFormats.ZIP.builder("zip").allowTo().markLossless().withCategory("archive"),
   ], true),
+  new MockedHandler("pdfparse", [
+    CommonFormats.PDF.builder("pdf").allowFrom(),
+    CommonFormats.TEXT.builder("txt").allowTo(),
+    CommonFormats.DOCX.builder("docx").allowTo(),
+  ], false),
 ]
 
 let supportedFormatCache = new Map<string, FileFormat[]>();
@@ -214,4 +219,23 @@ test('should find path from image to archive via anyinput\n', async () => {
   expect(extractedPaths[0][0].format.format).toBe("png");
   expect(extractedPaths[0][extractedPaths[0].length - 1].format.format).toBe("zip");
   expect(extractedPaths[0][extractedPaths[0].length - 1].handler.name).toBe("archiver");
+});
+
+test('should find direct path from pdf to docx\n', async () => {
+  const graph = new TraversionGraph();
+  graph.init(supportedFormatCache, handlers);
+
+  const pdfparse = handlers.find(h => h.name === "pdfparse")!;
+  const paths = graph.searchPath(
+    new ConvertPathNode(pdfparse, CommonFormats.PDF.builder("pdf").allowFrom()),
+    new ConvertPathNode(pdfparse, CommonFormats.DOCX.builder("docx").allowTo()),
+    true
+  );
+
+  const extractedPaths = [];
+  for await (const path of paths) extractedPaths.push(path);
+
+  expect(extractedPaths.length).toBeGreaterThan(0);
+  expect(extractedPaths[0].map(c => c.format.format)).toEqual(["pdf", "docx"]);
+  expect(extractedPaths[0][1].handler.name).toBe("pdfparse");
 });
