@@ -52,14 +52,6 @@ export default defineConfig({
           dest: "wasm"
         },
         {
-          src: "src/handlers/espeakng.js/js/espeakng.worker.js",
-          dest: "js"
-        },
-        {
-          src: "src/handlers/espeakng.js/js/espeakng.worker.data",
-          dest: "js"
-        },
-        {
           src: "node_modules/pdf-parse/dist/pdf-parse/web/pdf.worker.mjs",
           dest: "js"
         },

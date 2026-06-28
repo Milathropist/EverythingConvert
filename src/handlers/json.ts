@@ -1,7 +1,36 @@
 import CommonFormats from "src/CommonFormats.ts";
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
-import parseXML from "./envelope/parseXML.js";
 import * as yaml from "yaml";
+
+function parseXML (text: string): any {
+  const document = new DOMParser().parseFromString(text, "application/xml");
+  const parserError = document.querySelector("parsererror");
+  if (parserError) throw new Error(parserError.textContent || "Invalid XML.");
+
+  const readNode = (node: Element): any => {
+    const children = Array.from(node.children);
+    const attributes = Array.from(node.attributes);
+    const textContent = Array.from(node.childNodes)
+      .filter(child => child.nodeType === Node.TEXT_NODE)
+      .map(child => child.textContent?.trim() || "")
+      .filter(Boolean)
+      .join(" ");
+
+    const result: Record<string, any> = {
+      _tag: node.tagName,
+      _children: children.map(readNode)
+    };
+
+    if (attributes.length > 0) {
+      result._attributes = Object.fromEntries(attributes.map(attribute => [attribute.name, attribute.value]));
+    }
+    if (textContent) result._text = textContent;
+
+    return result;
+  };
+
+  return readNode(document.documentElement);
+}
 
 /// Converts things to JSON
 export class toJsonHandler implements FormatHandler {

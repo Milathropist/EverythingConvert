@@ -1,6 +1,35 @@
 import CommonFormats from "src/CommonFormats.ts";
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
-import { imageToText, rgbaToGrayscale } from "./image-to-txt/src/convert.ts";
+
+function rgbaToGrayscale (r: number, g: number, b: number, a: number): number {
+  const luminance = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+  return (luminance * a) + (1 - a);
+}
+
+function imageToText (image: {
+  width: () => number;
+  height: () => number;
+  getPixel: (x: number, y: number) => number;
+}): string {
+  const chars = " .:-=+*#%@";
+  const width = image.width();
+  const height = image.height();
+  const sampleX = Math.max(1, Math.ceil(width / 120));
+  const sampleY = Math.max(1, sampleX * 2);
+  const lines: string[] = [];
+
+  for (let y = 0; y < height; y += sampleY) {
+    let line = "";
+    for (let x = 0; x < width; x += sampleX) {
+      const value = Math.max(0, Math.min(1, image.getPixel(x, y)));
+      const index = Math.round((1 - value) * (chars.length - 1));
+      line += chars[index];
+    }
+    lines.push(line.trimEnd());
+  }
+
+  return lines.join("\n");
+}
 
 class canvasToBlobHandler implements FormatHandler {
 
