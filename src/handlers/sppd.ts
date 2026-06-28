@@ -233,7 +233,7 @@ class sppdHandler implements FormatHandler {
   addVoxelPoint (point: Vector, voxels: Map<string, Vector>) {
     const voxelPosition = point
       .Sub(this.voxelGridOffset || new Vector())
-      .map(c => Math.floor(c / VOXEL_SIZE));
+      .map((c: number) => Math.floor(c / VOXEL_SIZE));
     const voxelKey = `${voxelPosition.x};${voxelPosition.y};${voxelPosition.z}`;
     if (voxels.has(voxelKey)) return;
     voxels.set(voxelKey, voxelPosition);
@@ -312,7 +312,7 @@ class sppdHandler implements FormatHandler {
         const doorForward = door.GetForwardVector();
         this.voxelGridOffset = doorPosition
           .Add(doorForward.Scale(-16))
-          .map(c => c % 64);
+          .map((c: number) => c % 64);
       }
     }
 
@@ -528,7 +528,7 @@ class sppdHandler implements FormatHandler {
 
       const demo: Demo = await new Promise(resolve => {
         new Demo(inputFile.bytes, {
-          onTick: (demo) => this.collectPoints(demo, voxels, portalVoxels),
+          onTick: (demo: Demo) => this.collectPoints(demo, voxels, portalVoxels),
           onFinish: resolve
         });
       });

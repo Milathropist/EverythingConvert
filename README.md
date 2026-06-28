@@ -42,7 +42,7 @@ Though please note, "converting X to Y doesn't work" is **not** a bug report.  H
 
 ### Local development (Bun + Vite)
 
-1. Clone this repository ***WITH SUBMODULES***. You can use `git clone --recursive https://github.com/p2r3/convert` for that. Omitting submodules will leave you missing a few dependencies.
+1. Clone or download this repository with all vendored `src/handlers` folders included. Omitting those folders will leave you missing a few dependencies.
 2. Install [Bun](https://bun.sh/).
 3. Run `bun install` to install dependencies.
 4. Run `bunx vite` to start the development server.

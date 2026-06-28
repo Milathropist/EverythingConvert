@@ -1,7 +1,7 @@
 import CommonFormats, { Category } from "src/CommonFormats.ts";
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
 
-import { QOIDecoder, QOIEncoder } from "qoi-fu";
+import { QOIDecoder, QOIEncoder } from "./qoi-fu/transpiled/QOI.js";
 
 class qoiFuHandler implements FormatHandler {
 

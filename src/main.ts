@@ -423,6 +423,9 @@ async function buildOptionList () {
       newOption.setAttribute("mime-type", format.mime);
 
       const formatDescriptor = format.format.toUpperCase();
+      const optionLabel = document.createElement("span");
+      optionLabel.className = "format-label";
+
       if (simpleMode) {
         // Hide any handler-specific information in simple mode
         const cleanName = format.name
@@ -430,10 +433,11 @@ async function buildOptionList () {
           .filter((_, i) => i % 2 === 0)
           .filter(c => c != "")
           .join(" ");
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${cleanName} (${format.mime})`));
+        optionLabel.textContent = `${formatDescriptor} - ${cleanName} (${format.mime})`;
       } else {
-        newOption.appendChild(document.createTextNode(`${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`));
+        optionLabel.textContent = `${formatDescriptor} - ${format.name} (${format.mime}) ${handler.name}`;
       }
+      newOption.appendChild(optionLabel);
 
       const clickHandler = (event: Event) => {
         if (!(event.target instanceof HTMLButtonElement)) return;

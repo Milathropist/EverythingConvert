@@ -43,14 +43,6 @@
     "src"
   ],
   "exclude": [
-    "src/handlers/envelope.ts",
-    "src/handlers/qoi-fu.ts",
-    "src/handlers/qoa-fu.ts",
-    "src/handlers/rpgmvp.ts",
-    "src/handlers/sppd.ts",
-    "src/handlers/terrariawld.ts",
-    "src/handlers/turbowarp.ts",
-    "src/handlers/xcf.ts",
     "src/handlers/qoi-fu/**/*",
     "src/handlers/qoa-fu/**/*",
     "src/handlers/sppd/**/*",

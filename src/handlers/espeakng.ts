@@ -1,10 +1,13 @@
 import CommonFormats from "src/CommonFormats.ts";
 import type { FileData, FileFormat, FormatHandler } from "../FormatHandler.ts";
+import { SimpleTTS } from "./espeakng.js/js/espeakng-simple.js";
 import { WaveFile } from "wavefile";
+import { appAssetUrl } from "../assetUrl.ts";
 
 export class espeakngHandler implements FormatHandler {
   public name: string = "espeakng";
   public ready: boolean = true;
+  #tts: SimpleTTS | undefined = undefined;
 
   public supportedFormats: FileFormat[] = [
     CommonFormats.TEXT.supported("text", true, false),
@@ -15,24 +18,24 @@ export class espeakngHandler implements FormatHandler {
     this.ready = true;
   }
 
-  textToSamples(text: string): Int16Array {
-    const sampleRate = 22050;
-    const cleanText = text.trim() || " ";
-    const secondsPerCharacter = 0.055;
-    const durationSeconds = Math.min(8, Math.max(0.75, cleanText.length * secondsPerCharacter));
-    const samples = new Int16Array(Math.ceil(sampleRate * durationSeconds));
-    const characterSamples = Math.max(1, Math.floor(samples.length / cleanText.length));
-
-    for (let i = 0; i < samples.length; i++) {
-      const character = cleanText[Math.min(cleanText.length - 1, Math.floor(i / characterSamples))];
-      const charCode = character.codePointAt(0) || 32;
-      const frequency = 180 + (charCode % 48) * 9;
-      const envelope = Math.sin(Math.PI * (i / samples.length));
-      const wave = Math.sin((Math.PI * 2 * frequency * i) / sampleRate);
-      samples[i] = Math.round(wave * envelope * 9000);
+  // Lazy-load the TTS worker so it does not slow down initial format listing.
+  async getTTS(): Promise<SimpleTTS> {
+    if(this.#tts == undefined) {
+      await new Promise<void>((resolve, reject) => {
+        this.#tts = new SimpleTTS({
+          workerPath: appAssetUrl("js/espeakng.worker.js"),
+          defaultVoice: "en",
+          defaultRate: 220,
+          defaultPitch: 200,
+          enhanceAudio: true
+        });
+        this.#tts.onReady((error?: unknown) => {
+          if (error) reject(error);
+          else resolve();
+        })
+      });
     }
-
-    return samples;
+    return this.#tts!;
   }
 
   async doConvert (
@@ -40,19 +43,27 @@ export class espeakngHandler implements FormatHandler {
     inputFormat: FileFormat,
     outputFormat: FileFormat
   ): Promise<FileData[]> {
-    if (inputFormat.mime !== CommonFormats.TEXT.mime || outputFormat.mime !== CommonFormats.WAV.mime) {
+    if (inputFormat.mime !== CommonFormats.TEXT.mime || outputFormat.mime !== CommonFormats.WAV.mime)
       throw new Error("Unsupported conversion.");
-    }
 
-    return inputFiles.map(file => {
-      const samples = this.textToSamples(new TextDecoder().decode(file.bytes));
+    const tts = await this.getTTS();
+    return Promise.all(inputFiles.map(async(file) => {
+      const audio = await new Promise<AudioBuffer>((resolve, reject) => {
+        tts.speak(new TextDecoder().decode(file.bytes), (audio: Float32Array | null) => {
+          if (!audio) reject(new Error("Text to speech returned no audio."));
+          else resolve(SimpleTTS.createAudioBuffer(audio, tts.sampleRate) as AudioBuffer);
+        })
+      });
+      const samples = audio.getChannelData(0);
       const wav = new WaveFile();
-      wav.fromScratch(1, 22050, "16", samples);
+      // Increasing pitch doesn't seem to do anything, so instead we
+      // decrease playback rate and increase playback sample rate.
+      wav.fromScratch(1, tts.sampleRate * 1.4, "32f", samples);
       return {
         name: file.name.split(".").slice(0, -1).join(".")+".wav",
         bytes: new Uint8Array(wav.toBuffer())
       }
-    })
+    }))
   }
 }
 
