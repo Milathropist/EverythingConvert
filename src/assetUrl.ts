@@ -1,4 +1,8 @@
 export function appAssetUrl (path: string): string {
   const cleanPath = path.replace(/^\/+/, "");
-  return new URL(`../${cleanPath}`, import.meta.url).toString();
+  const baseUrl = typeof document === "undefined"
+    ? new URL("../", globalThis.location.href).toString()
+    : document.baseURI;
+
+  return new URL(cleanPath, baseUrl).toString();
 }

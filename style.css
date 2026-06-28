@@ -351,6 +351,7 @@ h2 {
 
 .format-list button {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -366,12 +367,12 @@ h2 {
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.45;
-  overflow: hidden;
+  overflow: visible;
   overflow-wrap: anywhere;
   text-align: center;
   text-transform: none;
   white-space: normal;
-  word-break: break-word;
+  word-break: normal;
 }
 
 .format-label {
@@ -381,7 +382,7 @@ h2 {
   text-align: center;
   overflow-wrap: anywhere;
   text-wrap: pretty;
-  word-break: break-word;
+  word-break: normal;
 }
 
 .format-list button:hover,
