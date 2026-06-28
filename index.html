@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <title>Convert to it!</title>
+  
+  <meta name="og:title" content="Convert to it!"/>
+  <meta name="og:site_name" content="Convert to it!"/>
+  <meta name="og:description" content="Truly universal online file converter. Private, on-device conversion across mediums."/>
+  <meta name="og:image" content="favicon.ico"/>
+  <meta name="theme-color" content="#90ee90"/>
+  <meta name="og:type" content="website"/>
+</head>
+<body>
+
+  <canvas id="interactive-background-canvas" aria-hidden="true"></canvas>
+
+  <input id="file-input" type="file">
+
+  <a id="commit-id" href="https://github.com/p2r3/convert"></a>
+
+  <div id="wrapper">
+    <header id="header">
+      <div class="content">
+        <div class="inner">
+          <p class="eyebrow">Private browser converter</p>
+          <h1>Convert to it!</h1>
+          <p>Universal, on-device file conversion across mediums.</p>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="file-area" aria-label="Choose files to convert">
+        <h2>Click to add your file</h2>
+        <p id="drop-hint-text">or drag and drop it here</p>
+      </section>
+
+      <div id="side-panel">
+        <button id="mode-button">Advanced mode</button>
+      </div>
+
+      <div id="format-containers">
+
+        <section id="from-container" class="format-container">
+          <h2>Convert from</h2>
+          <input type="text" id="search-from" class="search" placeholder="Search">
+          <div id="from-list" class="format-list">
+
+          </div>
+        </section>
+
+        <section id="to-container" class="format-container">
+          <h2>Convert to</h2>
+          <input type="text" id="search-to" class="search" placeholder="Search">
+          <div id="to-list" class="format-list">
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <button id="convert-button" class="disabled">Convert</button>
+
+  <div id="popup-bg"></div>
+  <div id="popup">
+    <div class="loading-shell" role="status" aria-live="polite">
+      <div class="loading-orbit" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <h2>Loading tools...</h2>
+      <p>Preparing converter assets</p>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.ts"></script>
+  <script>
+    window.setTimeout(function () {
+      if (window.__convertAppStarted) return;
+
+      var popup = document.getElementById("popup");
+      var popupBg = document.getElementById("popup-bg");
+      if (!popup || !popupBg) return;
+
+      popupBg.style.display = "block";
+      popup.style.display = "block";
+      popup.innerHTML =
+        "<h2>Vite is required</h2>" +
+        "<p>This source app cannot run through a plain static Live Server. Use <b>npm.cmd run dev</b>, or build it and serve the <b>dist</b> folder.</p>";
+    }, 4000);
+  </script>
+
+</body>
+</html>
