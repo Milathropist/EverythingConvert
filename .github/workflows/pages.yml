@@ -2,8 +2,9 @@ name: Publish to GitHub Pages
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main", "master"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -43,6 +44,9 @@ jobs:
 
       - name: Remove custom domain file
         run: rm -f dist/CNAME
+
+      - name: Disable Jekyll
+        run: touch dist/.nojekyll
 
       - name: Test traversion graph
         run: bun test test/TraversionGraph.test.ts
