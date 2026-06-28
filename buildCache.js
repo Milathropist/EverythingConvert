@@ -33,7 +33,7 @@ await Promise.all([
       if (text === "Built initial format list.") resolve();
     });
   }),
-  page.goto("http://localhost:8080/convert/index.html")
+  page.goto("http://localhost:8080/convert/index.html?cache-build=1")
 ]);
 
 const cacheJSON = await page.evaluate((minify) => {

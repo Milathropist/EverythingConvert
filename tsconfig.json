@@ -44,7 +44,6 @@
   ],
   "exclude": [
     "src/handlers/envelope.ts",
-    "src/handlers/espeakng.ts",
     "src/handlers/qoi-fu.ts",
     "src/handlers/qoa-fu.ts",
     "src/handlers/rpgmvp.ts",

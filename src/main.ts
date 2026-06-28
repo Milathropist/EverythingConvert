@@ -298,7 +298,8 @@ window.hidePopup = function () {
   ui.popupBackground.style.display = "none";
 }
 
-const HANDLER_INIT_TIMEOUT_MS = 5000;
+const isCacheBuild = new URLSearchParams(window.location.search).has("cache-build");
+const HANDLER_INIT_TIMEOUT_MS = isCacheBuild ? 90000 : 5000;
 
 function getErrorMessage (err: unknown): string {
   if (err instanceof Error) return err.message;
